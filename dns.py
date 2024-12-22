@@ -44,6 +44,18 @@ if "account.nintendo.net" not in address_map:
         exit()
     address_map["account.nintendo.net"] = default_address
 
+if "discovery.olv.nintendo.net" not in address_map:
+    default_address = os.getenv("DNS_DEFAULT_ADDRESS")
+    if not default_address:
+        print(colored(
+            "Mapping for discovery.olv.nintendo.net not found and no default address set. "
+            "Set either DNS_DEFAULT_ADDRESS or DNS_MAP_discovery.olv.nintendo.net",
+            "red",
+            attrs=["bold"]
+        ))
+        exit()
+    address_map["discovery.olv.nintendo.net"] = default_address
+
 udp_port = int(os.getenv("UDP_PORT", 0))
 tcp_port = int(os.getenv("TCP_PORT", 0))
 
@@ -77,16 +89,17 @@ udp_server = None
 tcp_server = None
 
 if udp_port != 0:
-    udp_server = DNSServer(DNSHandler(), port=udp_port, address="0.0.0.0", tcp=False)
+    udp_server = DNSServer(DNSHandler(), port=udp_port, address=os.getenv("UDP_ADDRESS"), tcp=False)
 
 if tcp_port != 0:
-    tcp_server = DNSServer(DNSHandler(), port=tcp_port, address="0.0.0.0", tcp=True)
+    tcp_server = DNSServer(DNSHandler(), port=tcp_port, address=os.getenv("UDP_ADDRESS"), tcp=True)
 
 table_data = [["Protocol", "Address"]]
 if udp_server:
-    table_data.append(["UDP", f"0.0.0.0:{udp_port}"])
+    udp_address = os.getenv("UDP_ADDRESS")
+    table_data.append(["UDP", f"{udp_address}:{udp_port}"])
 if tcp_server:
-    table_data.append(["TCP", f"0.0.0.0:{tcp_port}"])
+    table_data.append(["TCP", f"{udp_address}:{tcp_port}"])
 
 print(colored("DNS listening on the following addresses", "green", attrs=["bold"]))
 print(tabulate(table_data, headers="firstrow", tablefmt="grid"))

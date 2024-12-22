@@ -1,3 +1,3 @@
 @echo off
-py dns.py
+python3 dns.py
 pause
